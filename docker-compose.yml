@@ -1,4 +1,4 @@
-version: '3.4'
+version: "3.4"
 
 services:
   csvreader:
@@ -7,5 +7,5 @@ services:
     volumes:
       - ./:/usr/src/app/
     ports:
-      - 3001:3000
+      - 4200:4200
     stdin_open: true
