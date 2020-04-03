@@ -3,7 +3,9 @@ version: '3.4'
 services:
   csvreader:
     build: .
+    container_name: csvreader
     volumes:
       - ./:/usr/src/app/
     ports:
       - 3001:3000
+    stdin_open: true
