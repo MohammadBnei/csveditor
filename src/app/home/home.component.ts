@@ -1,22 +1,26 @@
-import { Component, OnInit, ViewChild, ElementRef  } from '@angular/core'
+import { Component, ViewChild, ElementRef  } from '@angular/core'
 import { HttpEventType, HttpErrorResponse } from '@angular/common/http'
 import { of } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
+import { CsvService } from '../csv.service'
 import { UploadService } from '../upload.service'
+import { NgxCSVParserError } from 'ngx-csv-parser'
 
 @Component({
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit {
-    @ViewChild('fileUpload', {static: false}) fileUpload: ElementRef; files = []
-    constructor(private uploadService: UploadService) { }
+export class HomeComponent {
+    @ViewChild('fileUpload', {static: false}) fileUpload: ElementRef; files: Array<File> = []
+    parsedFile = []
 
-    ngOnInit(): void {
-    }
+    constructor(
+      private csvService: CsvService,
+      private uploadService: UploadService
+    ) { }
 
-    uploadFile(file) {
+    uploadFile(file): void {
         const formData = new FormData()
 
         formData.append('file', file.data)
@@ -32,10 +36,10 @@ export class HomeComponent implements OnInit {
                     return event
                 }
             }),
-            catchError((error: HttpErrorResponse) => {
+            catchError((error: HttpErrorResponse)  => {
                 file.inProgress = false
 
-                return of(`${file.data.name} upload failed.`)
+                return of(`${file.data.name} upload failed.`, error)
             })
         )
             .subscribe((event: any) => {
@@ -46,7 +50,7 @@ export class HomeComponent implements OnInit {
 
     }
 
-    private uploadFiles() {
+    private uploadFiles(): void {
         this.fileUpload.nativeElement.value = ''
 
         this.files.forEach(file => {
@@ -54,21 +58,44 @@ export class HomeComponent implements OnInit {
         })
     }
 
-    onClick() {
+    onClick(): void {
         const fileUpload = this.fileUpload.nativeElement
-        fileUpload.onchange = () => {
+        fileUpload.onchange = (): void => {
             for (let i = 0; i < fileUpload.files.length; i++) {
                 const file = fileUpload.files[i]
-                this.files.push({
-                    data: file,
-                    inProgress: false,
-                    progress: 0
-                })
+                this.files.push(file)
             }
 
-            this.uploadFiles()
+            // this.uploadFiles()
         }
 
         fileUpload.click()
+    }
+
+    removeFile(index: number): void {
+        if (index >= this.files.length) {
+            console.error('index out of range : ', index)
+            return
+        }
+        this.files.splice(index, 1)
+    }
+
+    parse(index: number): void {
+        if (index >= this.files.length) {
+            console.error('Incorrect index : ', index)
+        }
+
+        this.parseCsvFile(this.files[index])
+    }
+
+    parseCsvFile(file: File): void {
+        this.csvService.parseCsvFile(file)
+            .pipe()
+            .subscribe((result: Array<any>) => {
+                console.log({result})
+                this.parsedFile = result
+            }, (error: NgxCSVParserError) => {
+                console.log('Error', error)
+            })
     }
 }

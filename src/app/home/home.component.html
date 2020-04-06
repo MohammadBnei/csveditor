@@ -2,11 +2,14 @@
   <mat-card style="margin-top:10px; width: 50%;">
     <mat-card-content>
       <ul>
-        <li *ngFor='let file of files'>
-          <mat-progress-bar [value]='file.progress'></mat-progress-bar>
+        <li *ngFor='let file of files; index as index;'>
           <span id="file-label">
-            {{file.data.name}}
+            {{file.name}}
           </span>
+          <button mat-button (click)="parse(index)">Parse</button>
+          <button mat-button (click)="removeFile(index)">
+            <mat-icon class="mat-18">delete</mat-icon>
+          </button>
         </li>
       </ul>
     </mat-card-content>
