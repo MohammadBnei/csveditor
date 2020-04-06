@@ -13,7 +13,8 @@ import { NgxCSVParserError } from 'ngx-csv-parser'
 })
 export class HomeComponent {
     @ViewChild('fileUpload', {static: false}) fileUpload: ElementRef; files: Array<File> = []
-    parsedFile = []
+    data: Array<Record<string, string>> = null
+    headers: Array<string> = null
 
     constructor(
       private csvService: CsvService,
@@ -90,10 +91,14 @@ export class HomeComponent {
 
     parseCsvFile(file: File): void {
         this.csvService.parseCsvFile(file)
-            .pipe()
+            .pipe(
+                map((data: Array<any>) => data.filter(d => !Array.isArray(d)))
+            )
             .subscribe((result: Array<any>) => {
-                console.log({result})
-                this.parsedFile = result
+                if (result.length > 0) {
+                    this.headers = Object.keys(result[0])
+                    this.data = result
+                }
             }, (error: NgxCSVParserError) => {
                 console.log('Error', error)
             })
