@@ -1,10 +1,5 @@
 import { Component, ViewChild, ElementRef  } from '@angular/core'
-import { HttpEventType, HttpErrorResponse } from '@angular/common/http'
-import { of } from 'rxjs'
-import { catchError, map } from 'rxjs/operators'
-import { CsvService } from '../csv.service'
-import { UploadService } from '../upload.service'
-import { NgxCSVParserError } from 'ngx-csv-parser'
+import { NgxCsvParser, NgxCSVParserError } from 'ngx-csv-parser'
 
 @Component({
     selector: 'app-home',
@@ -17,47 +12,8 @@ export class HomeComponent {
     headers: Array<string> = null
 
     constructor(
-      private csvService: CsvService,
-      private uploadService: UploadService
+      private ngxCSVParser: NgxCsvParser,
     ) { }
-
-    uploadFile(file): void {
-        const formData = new FormData()
-
-        formData.append('file', file.data)
-        file.inProgress = true
-
-        this.uploadService.upload(formData).pipe(
-            map(event => {
-                switch (event.type) {
-                case HttpEventType.UploadProgress:
-                    file.progress = Math.round(event.loaded * 100 / event.total)
-                    break
-                case HttpEventType.Response:
-                    return event
-                }
-            }),
-            catchError((error: HttpErrorResponse)  => {
-                file.inProgress = false
-
-                return of(`${file.data.name} upload failed.`, error)
-            })
-        )
-            .subscribe((event: any) => {
-                if (typeof (event) === 'object') {
-                    console.log(event.body)
-                }
-            })
-
-    }
-
-    private uploadFiles(): void {
-        this.fileUpload.nativeElement.value = ''
-
-        this.files.forEach(file => {
-            this.uploadFile(file)
-        })
-    }
 
     onClick(): void {
         const fileUpload = this.fileUpload.nativeElement
@@ -90,10 +46,10 @@ export class HomeComponent {
     }
 
     parseCsvFile(file: File): void {
-        this.csvService.parseCsvFile(file)
-            .pipe(
-                map((data: Array<any>) => data.filter(d => !Array.isArray(d)))
-            )
+        this.ngxCSVParser.parse(file, {
+            header: true
+        })
+            .pipe()
             .subscribe((result: Array<any>) => {
                 if (result.length > 0) {
                     this.headers = Object.keys(result[0])

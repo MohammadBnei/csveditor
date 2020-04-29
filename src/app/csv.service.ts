@@ -1,20 +1,33 @@
 import { Injectable } from '@angular/core'
 import { NgxCsvParser } from 'ngx-csv-parser'
-import { Observable } from 'rxjs'
 
 @Injectable({
     providedIn: 'root'
 })
 export class CsvService {
-  config = {
-      header: true,
-      delimiter: ','
+  file: File = null
+  initialFile: File = null
+
+  constructor(private ngxCsvParser: NgxCsvParser) {}
+
+  /**
+   * Sets the file of the csv service
+   * @param file File
+   */
+  public setFile(file: File): void {
+      this.file = file
+      this.initialFile = file
   }
 
-  constructor(private csvParser: NgxCsvParser) { }
+    //   public parseCsvFile(file: File): Observable<Array<any>> {
+    //       const csvParser = new Observable(observer => {
+    //           console.log({file})
 
-  public parseCsvFile(file: File): Observable<Array<any>> {
-      return this.csvParser.parse(file, this.config)
+    //           observer.next([])
 
-  }
+    //           return {unsubscribe() {}}
+    //       })
+
+//       return csvParser
+//   }
 }

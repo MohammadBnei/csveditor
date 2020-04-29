@@ -18,9 +18,13 @@ import { HomeComponent } from './home/home.component'
 import { AboutComponent } from './about/about.component'
 import { AppRoutingModule } from './app-routing.module'
 import { CsvTableComponent } from './csv-table/csv-table.component'
-
+import { FormsModule } from '@angular/forms'
+import { MatDialogModule } from '@angular/material/dialog'
+import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatInputModule } from '@angular/material/input'
+import { DialogBoxComponent } from './dialog-box/dialog-box.component'
 @NgModule({
-    declarations: [AppComponent, HomeComponent, AboutComponent, CsvTableComponent],
+    declarations: [AppComponent, HomeComponent, AboutComponent, CsvTableComponent, DialogBoxComponent],
     imports: [
         BrowserModule,
         HttpClientModule,
@@ -33,6 +37,13 @@ import { CsvTableComponent } from './csv-table/csv-table.component'
         MatTableModule,
         MatPaginatorModule,
         AppRoutingModule,
+        FormsModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule
+    ],
+    entryComponents: [
+        DialogBoxComponent
     ],
     providers: [],
     bootstrap: [AppComponent],
