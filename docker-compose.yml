@@ -9,3 +9,4 @@ services:
     ports:
       - 4200:4200
     stdin_open: true
+    entrypoint: npm start

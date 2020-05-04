@@ -4,15 +4,19 @@ import { MatPaginator } from '@angular/material/paginator'
 import { MatTableDataSource, MatTable } from '@angular/material/table'
 import { MatDialog } from '@angular/material/dialog'
 
+import * as csv from 'csvtojson'
+
 @Component({
     selector: 'app-csv-table',
     templateUrl: './csv-table.component.html',
     styleUrls: ['./csv-table.component.css'],
 })
 export class CsvTableComponent implements OnInit{
-  @Input() data: Array<Array<string>>
-  @Input() headers: Array<string>
+  @Input() file: File
   dataSource: MatTableDataSource<any>
+
+  headers: Array<string>
+  data: Array<Array<string>>
 
 
   @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator
@@ -22,21 +26,43 @@ export class CsvTableComponent implements OnInit{
   constructor(public dialog: MatDialog) {}
 
   ngOnInit(): void {
-      this.dataSource = new MatTableDataSource(this.data)
-      this.dataSource.paginator = this.paginator
+      this.parseFileToCsvArray(this.file)
+          .then(() => {
+
+              console.log({data: this.data, headers: this.headers})
+
+              this.dataSource = new MatTableDataSource(this.data)
+              this.dataSource.paginator = this.paginator
+          })
+  }
+
+  async parseFileToCsvArray(file: File) {
+      return csv({
+          output: 'csv',
+          noheader: true
+      })
+          .fromString(await file.text())
+          .then(csvArray => {
+              this.headers = csvArray[0]
+              this.data = csvArray.slice(1)
+
+              return csvArray
+          })
   }
 
   openDialog(action, obj) {
       obj.action = action
+      if (action === 'Add') {
+          this.addRowData()
+          return
+      }
       const dialogRef = this.dialog.open(DialogBoxComponent, {
           width: '250px',
           data:obj
       })
 
       dialogRef.afterClosed().subscribe(result => {
-          if(result.event == 'Add'){
-              this.addRowData()
-          }else if(result.event == 'Update'){
+          if(result.event == 'Update'){
               this.updateRowData(result.data)
           }else if(result.event == 'Delete'){
               this.deleteRowData(result.data)
@@ -47,7 +73,7 @@ export class CsvTableComponent implements OnInit{
   addRowData(){
       const d = this.headers.map(() => '')
       this.data.push(d)
-      this.table.renderRows()
+      this.dataSource.data = this.data
 
   }
   updateRowData(rowIndex){

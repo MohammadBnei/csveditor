@@ -12,7 +12,9 @@
           <span id="file-label">
             {{file.name}}
           </span>
-          <button mat-button (click)="parse(index)">Parse</button>
+          <button mat-button (click)="selectFile(index)">
+            <mat-icon class="mat-18">play_for_work</mat-icon>
+          </button>
           <button mat-button (click)="removeFile(index)">
             <mat-icon class="mat-18">delete</mat-icon>
           </button>
@@ -22,5 +24,5 @@
   </mat-card>
   <input type="file" #fileUpload id="fileUpload" name="fileUpload" accept=".csv" style="display:none;" />
 
-  <app-csv-table *ngIf="data && headers" [data]="data" [headers]="headers"></app-csv-table>
+  <app-csv-table *ngIf="selectedFile" [file]="selectedFile"></app-csv-table>
 </div>
